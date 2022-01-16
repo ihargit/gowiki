@@ -61,12 +61,16 @@ func makeHandler(fn func (http.ResponseWriter, *http.Request, string)) http.Hand
 	}
 }
 
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/view/frontpage", http.StatusFound)
+}
+
 func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	p, err := loadPage(title)
 	if err != nil {
 		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
 		return
-}
+	}
 	renderTemplate(w, "view", p)
 }
 
@@ -92,6 +96,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 func main() {
 	_ = os.Mkdir(dirD, os.ModePerm)
 	_ = os.Mkdir(dirT, os.ModePerm)
+	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/view/", makeHandler(viewHandler))
 	http.HandleFunc("/edit/", makeHandler(editHandler))
   http.HandleFunc("/save/", makeHandler(saveHandler))
